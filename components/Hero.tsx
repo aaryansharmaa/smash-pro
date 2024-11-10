@@ -3,70 +3,84 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { HeroHighlight, Highlight } from "@/components/ui/hero-highlight";
 
 export default function Hero() {
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-screen flex items-center w-full justify-center overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 w-full h-full bg-black">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#40b7ff] rounded-full blur-[120px] opacity-20"></div>
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#85e715] rounded-full blur-[120px] opacity-20"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-electric-blue rounded-full blur-[120px] opacity-20"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-electric-green rounded-full blur-[120px] opacity-20"></div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
+      <div className="relative z-10 w-full py-2 -mt-22">
         <div className="text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-4xl sm:text-6xl font-bold text-white mb-6"
-          >
-            Welcome to the Future of
-            <span className="text-[#40b7ff]"> Pickleball</span>
-          </motion.h1>
+          <HeroHighlight className="w-full " containerClassName="w-full">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: [20, -5, 0] }}
+                transition={{ duration: 0.5, ease: [0.4, 0.0, 0.2, 1] }}
+                className="text-4xl sm:text-6xl font-bold text-white mb-6 flex flex-col items-center gap-4"
+              >
+                <span>Rooftop Pickleball in the</span>
+                <div className="inline-flex">
+                  <Highlight className="text-[#f9f9f9]">
+                    Heart of Hyderabad
+                  </Highlight>
+                </div>
+              </motion.h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto"
-          >
-            Experience state-of-the-art courts and professional facilities at
-            Smash Pro Arena. Where champions are made and memories are created.
-          </motion.p>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto"
+              >
+                Experience state-of-the-art courts and professional facilities
+                at Smash Pro Arena. Where champions are made and memories are
+                created.
+              </motion.p>
 
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="flex flex-col sm:flex-row gap-4 justify-center"
+              >
+                <button className="relative inline-flex h-16 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
+                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#4facfe_0%,#00f2fe_50%,#00f2fe_100%)]" />
+                  <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-6 py-1 text-lg font-medium text-white backdrop-blur-3xl hover:bg-slate-900">
+                    <Link href="#booking">Book a Court</Link>
+                  </span>
+                </button>
+
+                <button className="relative inline-flex h-16 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
+                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#4facfe_0%,#00f2fe_50%,#00f2fe_100%)]" />
+                  <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-6 py-1 text-lg font-medium text-white backdrop-blur-3xl hover:bg-slate-900">
+                    <Link href="#usp">Take a Tour</Link>
+                  </span>
+                </button>
+              </motion.div>
+            </div>
+          </HeroHighlight>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center"
           >
-            <Button className="bg-[#40b7ff] text-black hover:bg-[#40b7ff]/80 text-lg px-8 py-6">
-              <Link href="#booking">Book a Court</Link>
-            </Button>
-            <Button
-              variant="outline"
-              className="border-[#85e715] text-[#85e715] hover:bg-[#85e715]/10 text-lg px-8 py-6"
-            >
-              <Link href="#usp">Take a Tour</Link>
-            </Button>
+            <motion.div
+              animate={{ y: [0, 12, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="w-1 h-3 bg-white/20 rounded-full mt-2"
+            />
           </motion.div>
         </div>
-      </div>
-
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center"
-        >
-          <motion.div
-            animate={{ y: [0, 12, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="w-1 h-3 bg-white/20 rounded-full mt-2"
-          />
-        </motion.div>
       </div>
     </div>
   );
