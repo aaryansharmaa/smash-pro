@@ -10,9 +10,9 @@ import {
 
 const faqs = [
   {
-    question: "What equipment do I need to bring?",
+    question: "Do I need to bring my own paddle?",
     answer:
-      "We provide professional paddles and balls for all players. However, you're welcome to bring your own equipment if you prefer. Please wear appropriate athletic shoes with non-marking soles.",
+      "We provide professional paddles and balls for all players. However, you're welcome to bring your own equipment if you prefer.",
   },
   {
     question: "How long is each booking session?",
@@ -20,19 +20,19 @@ const faqs = [
       "Each booking session is 1 hour long. You can book multiple consecutive sessions if you need more time.",
   },
   {
-    question: "Do you offer coaching services?",
+    question: "Can we wear casual clothes and shoes?",
     answer:
-      "Yes, we have certified coaches available for private and group lessons. You can book coaching sessions through our booking system or contact us directly.",
+      "No, we only allow sports attire. Please wear appropriate athletic clothing and shoes.",
   },
   {
     question: "What is your cancellation policy?",
     answer:
-      "Cancellations made 24 hours before your booking time will receive a full refund. Late cancellations may be subject to a cancellation fee.",
+      "Cancellations made 24 hours before your booking time will receive a full refund. Late cancellations may be subject to a 50% cancellation fee.",
   },
   {
-    question: "Are there tournaments or leagues available?",
+    question: "Can we host tournaments at Smash Pro Arena?",
     answer:
-      "Yes! We regularly host tournaments and run leagues for all skill levels. Check our events calendar or sign up for our newsletter to stay updated.",
+      "Yes! you can regularly host tournaments by renting out our courts. Call us for more information.",
   },
 ];
 

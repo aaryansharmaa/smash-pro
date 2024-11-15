@@ -12,6 +12,15 @@ import {
   SelectValue,
   SelectGroup,
 } from "@/components/ui/select";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerClose,
+} from "@/components/ui/drawer";
 
 const generateTimeSlots = () => {
   const slots = [];
@@ -32,6 +41,7 @@ export default function Booking() {
   const [selectedTime, setSelectedTime] = useState("");
   const [duration, setDuration] = useState("");
   const timeSlots = generateTimeSlots();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   return (
     <section id="booking" className="pt-24 pb-20 bg-black relative">
@@ -126,6 +136,7 @@ export default function Booking() {
             <Button
               className="w-full bg-[#40b7ff] text-black hover:bg-[#40b7ff]/80"
               size="lg"
+              onClick={() => setIsDrawerOpen(true)}
             >
               Book Now
             </Button>
@@ -136,6 +147,42 @@ export default function Booking() {
           </motion.div>
         </div>
       </div>
+
+      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <DrawerContent className="bg-black/95 border-t-8 border-electric-green min-h-[80vh] fixed bottom-0 left-0 right-0 flex  items-center">
+          <div className="mx-auto w-full max-w-3xl">
+            <DrawerHeader>
+              <DrawerTitle className="text-white text-xl">
+                Complete Payment
+              </DrawerTitle>
+              <DrawerDescription className="text-gray-400">
+                Complete your booking for {selectedCourt} on{" "}
+                {date?.toLocaleDateString()} at {selectedTime}
+                <br />
+                <br />
+                To book multiple hours, please contact us on +91234567890 after
+                payment.
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="flex flex-col  overflow-y-auto">
+              {/* Payment content goes here */}
+            </div>
+            <DrawerFooter className=" ">
+              <Button className="bg-[#40b7ff] text-black hover:bg-[#40b7ff]/80">
+                Pay Now
+              </Button>
+              <DrawerClose asChild>
+                <Button
+                  variant="outline"
+                  className="text-white border-[#40b7ff]/20"
+                >
+                  Cancel
+                </Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </section>
   );
 }

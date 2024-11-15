@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { Cover } from "@/components/ui/cover";
 import { HeroHighlight, Highlight } from "@/components/ui/hero-highlight";
 
 export default function Hero() {
@@ -36,11 +37,9 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto"
+                className="text-4xl text-gray-400 mb-8 max-w-2xl mx-auto"
               >
-                Experience state-of-the-art courts and professional facilities
-                at Smash Pro Arena. Where champions are made and memories are
-                created.
+                <Cover className="font-bold">READY, SET, SMASH!</Cover>
               </motion.p>
 
               <motion.div
@@ -52,14 +51,14 @@ export default function Hero() {
                 <button className="relative inline-flex h-16 overflow-hidden rounded-full p-[2px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
                   <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#4facfe_0%,#00f2fe_50%,#00f2fe_100%)]" />
                   <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-6 py-1 text-lg font-medium text-white backdrop-blur-3xl hover:bg-slate-900">
-                    <Link href="#booking">Book a Court</Link>
+                    <a href="tel:+917702090273">Book a Court</a>
                   </span>
                 </button>
 
                 <button className="relative inline-flex h-16 overflow-hidden rounded-full p-[2px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
                   <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#4facfe_0%,#00f2fe_50%,#00f2fe_100%)]" />
                   <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-6 py-1 text-lg font-medium text-white backdrop-blur-3xl hover:bg-slate-900">
-                    <Link href="#usp">Take a Tour</Link>
+                    <Link href="#usp">Explore</Link>
                   </span>
                 </button>
               </motion.div>

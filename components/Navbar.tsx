@@ -30,21 +30,30 @@ export default function Navbar() {
 
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              <Button
-                variant="ghost"
+              <Link
+                href="#location"
                 className="text-white hover:text-[#40b7ff]"
               >
-                <Link href="#booking">Book Now</Link>
-              </Button>
-              <Button
-                variant="ghost"
-                className="text-white hover:text-[#40b7ff]"
-              >
-                <Link href="#faq">FAQ</Link>
-              </Button>
-              <Button className="bg-[#40b7ff] text-black hover:bg-[#40b7ff]/80">
-                Contact Us
-              </Button>
+                <Button
+                  variant="ghost"
+                  className="text-white hover:text-[#40b7ff]"
+                >
+                  Location
+                </Button>
+              </Link>
+              <Link href="#faq" className="text-white hover:text-[#40b7ff]">
+                <Button
+                  variant="ghost"
+                  className="text-white hover:text-[#40b7ff]"
+                >
+                  FAQ
+                </Button>
+              </Link>
+              <Link href="tel:+1234567890">
+                <Button className="bg-[#40b7ff] text-black hover:bg-[#40b7ff]/80">
+                  Call and Book
+                </Button>
+              </Link>
             </div>
           </div>
 
@@ -63,33 +72,35 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-black">
-            <Button
-              variant="ghost"
-              className="w-full text-white hover:text-[#40b7ff]"
-            >
-              Home
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full text-white hover:text-[#40b7ff]"
-            >
-              Courts
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full text-white hover:text-[#40b7ff]"
-            >
-              <Link href="#booking">Book Now</Link>
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full text-white hover:text-[#40b7ff]"
-            >
-              <Link href="#faq">FAQ</Link>
-            </Button>
-            <Button className="w-full bg-[#40b7ff] text-black hover:bg-[#40b7ff]/80">
-              Contact Us
-            </Button>
+            <Link href="/" className="block w-full">
+              <Button
+                variant="ghost"
+                className="w-full text-white hover:text-[#40b7ff]"
+              >
+                Home
+              </Button>
+            </Link>
+            <Link href="#location" className="block w-full">
+              <Button
+                variant="ghost"
+                className="w-full text-white hover:text-[#40b7ff]"
+              >
+                Location
+              </Button>
+            </Link>
+            <Link href="#faq" className="block w-full">
+              <Button
+                variant="ghost"
+                className="w-full text-white hover:text-[#40b7ff]"
+              >
+                FAQ
+              </Button>
+            </Link>
+            <Link href="tel:+917702090273" className="block w-full">
+              <Button className="w-full bg-[#40b7ff] text-black hover:bg-[#40b7ff]/80">
+                Call and Book{" "}
+              </Button>
+            </Link>
           </div>
         </div>
       )}

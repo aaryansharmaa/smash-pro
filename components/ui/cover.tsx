@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useId, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRef } from "react";
@@ -12,6 +13,7 @@ export const Cover = ({
   children?: React.ReactNode;
   className?: string;
 }) => {
+  const [mounted, setMounted] = useState(false);
   const [hovered, setHovered] = useState(false);
 
   const ref = useRef<HTMLDivElement>(null);
@@ -20,18 +22,22 @@ export const Cover = ({
   const [beamPositions, setBeamPositions] = useState<number[]>([]);
 
   useEffect(() => {
-    if (ref.current) {
-      setContainerWidth(ref.current?.clientWidth ?? 0);
+    setMounted(true);
+  }, []);
 
-      const height = ref.current?.clientHeight ?? 0;
-      const numberOfBeams = Math.floor(height / 10); // Adjust the divisor to control the spacing
-      const positions = Array.from(
-        { length: numberOfBeams },
-        (_, i) => (i + 1) * (height / (numberOfBeams + 1))
-      );
-      setBeamPositions(positions);
-    }
-  }, [ref.current]);
+  // Don't render motion elements until client-side
+  if (!mounted) {
+    return (
+      <span
+        className={cn(
+          "relative inline-block dark:text-electric-blue text-neutral-900",
+          className
+        )}
+      >
+        {children}
+      </span>
+    );
+  }
 
   return (
     <div

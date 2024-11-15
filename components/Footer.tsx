@@ -1,8 +1,13 @@
-import { Facebook, Instagram, Twitter } from "lucide-react";
+import { Facebook, Instagram, Twitter, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function Footer() {
+  const handleEmailClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.location.href = "mailto:smashpropickleball@gmail.com";
+  };
+
   return (
     <footer className="bg-black border-t border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -18,18 +23,14 @@ export default function Footer() {
                 />
               </div>
             </Link>
-            <p className="text-gray-400">
-              Where champions are made and memories are created.
-            </p>
+            <p className="text-gray-400">READY. SET. SMASH!</p>
             <div className="flex space-x-4">
-              <Link href="#" className="text-gray-400 hover:text-[#40b7ff]">
-                <Facebook className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-[#40b7ff]">
+              <Link
+                href="https://www.instagram.com/smashproarena/"
+                target="_blank"
+                className="text-gray-400 hover:text-[#40b7ff]"
+              >
                 <Instagram className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-[#40b7ff]">
-                <Twitter className="w-5 h-5" />
               </Link>
             </div>
           </div>
@@ -43,18 +44,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-[#40b7ff]">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-[#40b7ff]">
-                  Book a Court
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-[#40b7ff]">
-                  Tournaments
+                <Link
+                  href="#location"
+                  className="text-gray-400 hover:text-[#40b7ff]"
+                >
+                  Location
                 </Link>
               </li>
             </ul>
@@ -63,32 +57,41 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4">Contact</h3>
             <ul className="space-y-2">
+              <li className="text-gray-400">160/1, Sardar Patel Road</li>
               <li className="text-gray-400">
-                123 Sports Avenue
+                Beside Pizza Zone, Opposite Chutney&apos;s, Begumpet.
               </li>
-              <li className="text-gray-400">
-                New York, NY 10001
+              <li className="flex items-center gap-2">
+                <a
+                  href="#"
+                  onClick={handleEmailClick}
+                  className="text-gray-400 hover:text-[#40b7ff] transition-colors flex items-center gap-2"
+                >
+                  <Mail className="w-4 h-4" />
+                  smashpropickleball@gmail.com
+                </a>
               </li>
-              <li className="text-gray-400">
-                info@smashproarena.com
-              </li>
-              <li className="text-gray-400">
-                +1 (555) 123-4567
+              <li className="flex items-center gap-2">
+                <a
+                  href="tel:+917702090273"
+                  className="text-gray-400 hover:text-[#40b7ff] transition-colors flex items-center gap-2"
+                >
+                  <Phone className="w-4 h-4" />
+                  +917702090273
+                  <span className="text-xs px-2 py-1 rounded-full border border-gray-400 text-gray-400">
+                    Click to call
+                  </span>
+                </a>
               </li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-white font-semibold mb-4">Hours</h3>
+
             <ul className="space-y-2">
               <li className="text-gray-400">
-                Monday - Friday: 6am - 10pm
-              </li>
-              <li className="text-gray-400">
-                Saturday: 7am - 9pm
-              </li>
-              <li className="text-gray-400">
-                Sunday: 8am - 8pm
+                Monday - Sunday: 6 AM - 12 AM {"("}Midnight{")"}
               </li>
             </ul>
           </div>

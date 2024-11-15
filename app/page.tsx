@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import USP from "@/components/USP";
 import Booking from "@/components/Booking";
+import Location from "@/components/Location";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
 import { ThemeProvider } from "next-themes";
@@ -16,7 +17,8 @@ export default function Home() {
         <Navbar />
         <Hero />
         <USP />
-        <Booking />
+        {/* <Booking /> */}
+        <Location />
         <FAQ />
         <Footer />
       </main>
