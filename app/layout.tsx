@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   keywords: [
     "pickleball",
     "hyderabad",
-    "indoor courts",
+    "rooftop courts",
     "sports",
     "begumpet",
     "smash pro arena",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Smash Pro Pickleball Arena" }],
   openGraph: {
     title: "Smash Pro Arena Pickleball",
-    description: "Premier indoor pickleball court in Begumpet, Hyderabad",
+    description: "Premier rooftop pickleball court in Begumpet, Hyderabad",
     url: "https://www.smashpropickleball.in/",
     siteName: "Smash Pro Pickleball Arena",
     images: [
