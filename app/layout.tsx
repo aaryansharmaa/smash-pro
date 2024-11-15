@@ -10,8 +10,7 @@ export const metadata: Metadata = {
     default: "Smash Pro Arena Pickleball",
     template: "%s | Smash Pro Arena Pickleball",
   },
-  description:
-    "Premier indoor pickleball courts in Begumpet, Hyderabad. Professional courts, valet parking, and world-class facilities.",
+  description: "Premier rooftop pickleball court in Begumpet, Hyderabad.",
   keywords: [
     "pickleball",
     "hyderabad",

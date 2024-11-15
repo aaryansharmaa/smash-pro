@@ -40,7 +40,7 @@ const features = [
     icon: <Coffee className="w-6 h-6 text-[#40b7ff]" />,
     title: "Refreshments",
     description:
-      "Stay refreshed with a bottle of water with each 1 hour booking.",
+      "Stay refreshed with a bottle of water with each 1 hour booking + Pizza Zone right next door.",
     image: refreshments,
     width: 250,
     height: 250,
