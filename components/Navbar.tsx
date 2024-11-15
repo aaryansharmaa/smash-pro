@@ -15,13 +15,13 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-25">
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <div className="relative w-[280px] h-[100px] flex items-center justify-start">
+              <div className="relative w-[280px] h-[100px] flex items-center justify-start ">
                 <Image
                   src="/logo.png"
                   alt="Smash Pro Arena"
                   fill
                   priority
-                  className="object-contain"
+                  className="object-left object-contain"
                   sizes="400px"
                 />
               </div>

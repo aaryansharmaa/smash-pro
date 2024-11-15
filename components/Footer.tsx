@@ -1,4 +1,11 @@
-import { Facebook, Instagram, Twitter, Mail, Phone } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+  Mail,
+  Phone,
+  Search,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -23,15 +30,25 @@ export default function Footer() {
                 />
               </div>
             </Link>
-            <p className="text-gray-400">READY. SET. SMASH!</p>
-            <div className="flex space-x-4">
-              <Link
-                href="https://www.instagram.com/smashproarena/"
-                target="_blank"
-                className="text-gray-400 hover:text-[#40b7ff]"
-              >
-                <Instagram className="w-5 h-5" />
-              </Link>
+            <div className="flex md:flex-col flex-row gap-x-2">
+              <p className="text-gray-400">READY. SET. SMASH!</p>
+              <br />
+              <div className="flex space-x-4">
+                <Link
+                  href="https://www.instagram.com/smashproarena/"
+                  target="_blank"
+                  className="text-gray-400 hover:text-[#40b7ff]"
+                >
+                  <Instagram className="w-5 h-5" />
+                </Link>
+                <Link
+                  href="https://www.google.com/search?q=smash+pro+arena+pickleball"
+                  target="_blank"
+                  className="text-gray-400 hover:text-[#40b7ff]"
+                >
+                  <Search className="w-5 h-5" />
+                </Link>
+              </div>
             </div>
           </div>
 
