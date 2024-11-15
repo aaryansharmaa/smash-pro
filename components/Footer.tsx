@@ -100,6 +100,15 @@ export default function Footer() {
         <div className="mt-12 pt-8 border-t border-white/10">
           <p className="text-center text-gray-400">
             © {new Date().getFullYear()} Smash Pro Arena. All rights reserved.
+            Crafted by{" "}
+            <a
+              href="https://aaryansharma.info/ "
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#40b7ff] hover:text-[#40b7ff]/80 transition-colors duration-2001 font-medium animate-pulse"
+            >
+              aaryan.
+            </a>
           </p>
         </div>
       </div>
