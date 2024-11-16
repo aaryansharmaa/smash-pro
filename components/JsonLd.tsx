@@ -9,7 +9,7 @@ export default function JsonLd() {
     "@id": "https://www.smashpropickleball.in",
     name: "Smash Pro Arena Pickleball",
     description:
-      "Premier rooftop pickleball courts in the heart of Hyderabad. Professional courts, valet parking, and world-class facilities.",
+      "Premier rooftop pickleball courts in the heart of Hyderabad. Professional courts, valet parking, & world-class facilities.",
     url: "https://www.smashpropickleball.in",
     telephone: "+917702090273",
     email: "smashpropickleball@gmail.com",
