@@ -9,7 +9,7 @@ const Location = () => {
     <section id="location">
       <div className="h-[20rem] w-full flex items-center justify-center relative z-0">
         <PinContainer
-          title="Our Location"
+          title="Open in Google Maps"
           href="https://www.google.com/maps/dir//smash+pro+pickleball+hyderabad/"
         >
           <div className="flex basis-full flex-col p-4 tracking-tight text-slate-100/50 sm:basis-1/2 w-[20rem] h-[20rem]">

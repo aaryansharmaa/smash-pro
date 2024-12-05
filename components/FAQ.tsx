@@ -10,6 +10,11 @@ import {
 
 const faqs = [
   {
+    question: "How much does it cost to play?",
+    answer:
+      "The rate for one court is ₹1,000 per hour. You may book consecutive hours at once.",
+  },
+  {
     question: "Do I need to bring my own paddle?",
     answer:
       "We provide professional paddles and balls for all players. However, you're welcome to bring your own equipment if you prefer.",
