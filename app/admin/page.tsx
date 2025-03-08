@@ -44,6 +44,26 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+
+type Client = {
+  id: string;
+  name: string;
+};
 
 type Booking = {
   id: string;
@@ -51,8 +71,15 @@ type Booking = {
   booking_date: string;
   start_time: string;
   end_time: string;
-  price_per_hour: number;
-  total_price: number;
+  client_id: string;
+  clients: {
+    name: string;
+  };
+  price?: number;
+  total_price?: number;
+  price_per_hour?: number;
+  payment_type?: "CASH" | "ONLINE";
+  created_at: string;
 };
 
 export default function AdminPage() {
@@ -69,6 +96,16 @@ export default function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showClientDialog, setShowClientDialog] = useState(false);
+  const [newClientName, setNewClientName] = useState("");
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [bookingPrice, setBookingPrice] = useState<string>("");
+  const [paymentType, setPaymentType] = useState<"CASH" | "ONLINE">("CASH");
+  const [isClientPopoverOpen, setIsClientPopoverOpen] = useState(false);
 
   const supabase = createClientComponentClient();
   const { toast } = useToast();
@@ -103,7 +140,7 @@ export default function AdminPage() {
     try {
       const { data, error } = await supabase
         .from("court_bookings")
-        .select("*")
+        .select("*, clients(name)")
         .eq("booking_date", format(date, "yyyy-MM-dd"))
         .order("start_time");
 
@@ -121,7 +158,7 @@ export default function AdminPage() {
     try {
       const { data, error } = await supabase
         .from("court_bookings")
-        .select("*")
+        .select("*, clients(name)")
         .order("booking_date", { ascending: true });
 
       if (error) throw error;
@@ -133,23 +170,104 @@ export default function AdminPage() {
     }
   };
 
+  const fetchClients = async (search: string = "") => {
+    try {
+      console.log("Fetching clients with search:", search);
+      const { data, error } = await supabase.from("clients").select("*");
+
+      if (error) {
+        console.error("Error fetching clients:", error);
+        throw error;
+      }
+      console.log("Fetched clients:", data);
+      setClients(data || []);
+    } catch (error) {
+      console.error("Error searching clients:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch clients. Please try again.",
+      });
+    }
+  };
+
+  const createClient = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("clients")
+        .insert({ name: newClientName })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setSelectedClient(data);
+      setShowClientDialog(false);
+      setNewClientName("");
+      toast({
+        className: "bg-[#88aaee] border-2 border-black text-black",
+        title: "Success!",
+        description: "Client created successfully.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to create client. Please try again.",
+      });
+    }
+  };
+
+  const updateBookingPayment = async () => {
+    if (!selectedBooking) return;
+
+    try {
+      const { error } = await supabase
+        .from("court_bookings")
+        .update({
+          price: parseFloat(bookingPrice),
+          payment_type: paymentType,
+        })
+        .eq("id", selectedBooking.id);
+
+      if (error) throw error;
+
+      toast({
+        className: "bg-[#88aaee] border-2 border-black text-black",
+        title: "Success!",
+        description: "Payment details updated successfully.",
+      });
+
+      setShowPaymentDialog(false);
+      fetchBookings(todayDate);
+      fetchAllBookings();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update payment details. Please try again.",
+      });
+    }
+  };
+
   const handleBooking = async () => {
+    if (!selectedClient) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a client.",
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const startHour = parseInt(startTime.split(":")[0]);
-      const endHour = parseInt(endTime.split(":")[0]);
-      const hours =
-        endHour > startHour ? endHour - startHour : 24 - startHour + endHour;
-
-      const totalPrice = pricePerHour * hours;
-
       const { error } = await supabase.from("court_bookings").insert({
         court: selectedCourt,
         booking_date: format(newBookingDate, "yyyy-MM-dd"),
         start_time: startTime,
         end_time: endTime,
-        price_per_hour: pricePerHour,
-        total_price: totalPrice,
+        client_id: selectedClient.id,
       });
 
       if (error) {
@@ -178,6 +296,7 @@ export default function AdminPage() {
       // Reset form
       setStartTime("");
       setEndTime("");
+      setSelectedClient(null);
 
       // Refresh bookings if the new booking is for today
       if (
@@ -185,8 +304,6 @@ export default function AdminPage() {
       ) {
         await fetchBookings(todayDate);
       }
-
-      // Always refresh all bookings
       await fetchAllBookings();
     } catch (error) {
       console.error("Error creating booking:", error);
@@ -229,22 +346,35 @@ export default function AdminPage() {
 
   // Filter bookings based on search query
   const filteredAllBookings = useMemo(() => {
-    if (!searchQuery.trim()) return allBookings;
-
     return allBookings.filter((booking) => {
-      const searchString = `${booking.court} ${format(
-        new Date(booking.booking_date),
-        "yyyy-MM-dd"
-      )} ${booking.start_time} ${booking.end_time} ${
-        booking.total_price
-      }`.toLowerCase();
-      return searchString.includes(searchQuery.toLowerCase());
+      const searchString = searchQuery.toLowerCase();
+      return (
+        booking.court.toLowerCase().includes(searchString) ||
+        booking.booking_date.toLowerCase().includes(searchString) ||
+        booking.start_time.toLowerCase().includes(searchString) ||
+        booking.end_time.toLowerCase().includes(searchString) ||
+        (booking.price?.toString() || "").toLowerCase().includes(searchString)
+      );
     });
   }, [allBookings, searchQuery]);
 
   // Initial fetch
   useEffect(() => {
     fetchBookings(todayDate);
+  }, []);
+
+  // Update the effect to fetch clients on popover open
+  useEffect(() => {
+    if (isClientPopoverOpen) {
+      console.log("Popover opened, fetching initial clients");
+      fetchClients();
+    }
+  }, [isClientPopoverOpen]);
+
+  // Add a new effect to fetch clients on component mount
+  useEffect(() => {
+    console.log("Component mounted, fetching initial clients");
+    fetchClients();
   }, []);
 
   const renderBookingsList = (
@@ -303,51 +433,42 @@ export default function AdminPage() {
       const renderBookingCell = (booking?: Booking) => {
         if (!booking) return null;
         return (
-          <Card className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+          <Card
+            className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer"
+            onClick={() => {
+              setSelectedBooking(booking);
+              setBookingPrice(booking.price?.toString() || "");
+              setPaymentType(booking.payment_type || "CASH");
+              setShowPaymentDialog(true);
+            }}
+          >
             <CardContent className="p-4">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-start">
                 <div>
                   <p className="text-black font-bold">
                     {formatTimeToAMPM(booking.start_time)} -{" "}
                     {formatTimeToAMPM(booking.end_time)}
                   </p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {booking.clients.name}
+                  </p>
                   <p className="text-sm text-gray-600">
-                    ₹{booking.total_price}
+                    {booking.price
+                      ? `₹${booking.price} • ${booking.payment_type}`
+                      : "Payment pending"}
                   </p>
                 </div>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 bg-red-100 text-red-600 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:bg-red-200 transition-all"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="text-black">
-                        Delete Booking
-                      </AlertDialogTitle>
-                      <AlertDialogDescription className="text-gray-600">
-                        Are you sure you want to delete this booking? This
-                        action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel className="border-2 border-black bg-white text-black hover:bg-gray-100">
-                        Cancel
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDelete(booking.id)}
-                        className="bg-red-100 text-red-600 border-2 border-black hover:bg-red-200"
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(booking.id);
+                  }}
+                  className="h-8 w-8 bg-red-100 text-red-600 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:bg-red-200 transition-all"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -357,8 +478,12 @@ export default function AdminPage() {
       return (
         <div className="mt-4">
           <div className="grid grid-cols-2 gap-4 mb-4">
-            <h3 className="font-semibold text-lg text-center">Court One</h3>
-            <h3 className="font-semibold text-lg text-center">Court Two</h3>
+            <h3 className="font-semibold text-lg text-black text-center">
+              Court One
+            </h3>
+            <h3 className="font-semibold text-lg text-black text-center">
+              Court Two
+            </h3>
           </div>
           <div className="space-y-2">
             {allStartTimes.map((time) => {
@@ -391,9 +516,14 @@ export default function AdminPage() {
                     {formatTimeToAMPM(booking.start_time)} -{" "}
                     {formatTimeToAMPM(booking.end_time)}
                   </p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {booking.clients.name}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {booking.price ? `₹${booking.price}` : "Payment pending"}
+                  </p>
                 </div>
                 <div className="flex items-start gap-4">
-                  <p className="font-semibold">₹{booking.total_price}</p>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -474,6 +604,74 @@ export default function AdminPage() {
           <CardContent>
             <form className="grid gap-6">
               <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-black font-bold">Client Name</Label>
+                  <Popover
+                    open={isClientPopoverOpen}
+                    onOpenChange={setIsClientPopoverOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                      >
+                        {selectedClient?.name || "Select client"}
+                        <Search className="h-4 w-4 opacity-50 text-black" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="p-0 border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                      align="start"
+                      sideOffset={4}
+                      style={{ width: "var(--radix-popover-trigger-width)" }}
+                    >
+                      <Command className="border-none bg-transparent">
+                        <CommandInput
+                          placeholder="Search clients..."
+                          value={searchTerm}
+                          onValueChange={(search) => {
+                            setSearchTerm(search);
+                            fetchClients(search);
+                          }}
+                          className="border-none focus:ring-0 text-black"
+                          autoFocus
+                        />
+                        <CommandEmpty>
+                          <div className="p-4 text-center">
+                            <p className="text-sm text-gray-600">
+                              No clients found
+                            </p>
+                            <Button
+                              className="mt-2 bg-[#88aaee] text-black font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                              onClick={() => {
+                                setNewClientName(searchTerm);
+                                setShowClientDialog(true);
+                              }}
+                            >
+                              Create New Client
+                            </Button>
+                          </div>
+                        </CommandEmpty>
+                        <CommandGroup className="max-h-[200px] overflow-auto">
+                          {clients.map((client) => (
+                            <CommandItem
+                              key={client.id}
+                              value={client.name}
+                              onSelect={() => {
+                                setSelectedClient(client);
+                                setSearchTerm("");
+                                setIsClientPopoverOpen(false);
+                              }}
+                              className="flex items-center px-4 py-3 m-1 cursor-pointer text-black hover:bg-[#88aaee] hover:text-white rounded transition-all"
+                            >
+                              {client.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
                 <div className="space-y-2">
                   <Label className="text-black font-bold">Court</Label>
                   <Select
@@ -577,7 +775,7 @@ export default function AdminPage() {
           </TabsList>
           <TabsContent value="today">
             <Card className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-0">
                 <CardDescription className="text-black font-bold">
                   {format(todayDate, "MMMM d, yyyy")}
                 </CardDescription>
@@ -623,7 +821,12 @@ export default function AdminPage() {
                               {formatTimeToAMPM(booking.end_time)}
                             </p>
                             <p className="text-sm text-gray-600 mt-1">
-                              ₹{booking.total_price}
+                              {booking.clients.name}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {booking.price
+                                ? `₹${booking.price}`
+                                : "Payment pending"}
                             </p>
                           </div>
                           <AlertDialog>
@@ -668,8 +871,106 @@ export default function AdminPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* New Client Dialog */}
+        <Dialog open={showClientDialog} onOpenChange={setShowClientDialog}>
+          <DialogContent className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <DialogHeader>
+              <DialogTitle className="text-black">
+                Create New Client
+              </DialogTitle>
+              <DialogDescription className="text-gray-600">
+                Add a new client to the system.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-black font-bold">Client Name</Label>
+                <Input
+                  value={newClientName}
+                  onChange={(e) => setNewClientName(e.target.value)}
+                  className="bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowClientDialog(false)}
+                className="border-2 border-black bg-white text-black hover:bg-gray-100"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={createClient}
+                className="bg-[#88aaee] text-black font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+              >
+                Create Client
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Payment Dialog */}
+        <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+          <DialogContent className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <DialogHeader>
+              <DialogTitle className="text-black">
+                Update Payment Details
+              </DialogTitle>
+              <DialogDescription className="text-gray-600">
+                Enter the payment amount and select payment type.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-black font-bold">Amount</Label>
+                <Input
+                  type="number"
+                  value={bookingPrice}
+                  onChange={(e) => setBookingPrice(e.target.value)}
+                  placeholder="Enter amount"
+                  className="bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-black font-bold">Payment Type</Label>
+                <Select
+                  value={paymentType}
+                  onValueChange={(value: "CASH" | "ONLINE") =>
+                    setPaymentType(value)
+                  }
+                >
+                  <SelectTrigger className="bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                    <SelectValue placeholder="Select payment type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CASH">Cash</SelectItem>
+                    <SelectItem value="ONLINE">Online</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowPaymentDialog(false)}
+                className="border-2 border-black bg-white text-black hover:bg-gray-100"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={updateBookingPayment}
+                className="bg-[#88aaee] text-black font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+              >
+                Update Payment
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Toaster />
       </div>
-      <Toaster />
     </ThemeProvider>
   );
 }
