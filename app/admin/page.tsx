@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { createClientComponentClient } from "@/lib/supabase/client";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Trash2, Search, LogOut } from "lucide-react";
@@ -105,6 +105,7 @@ export default function AdminPage() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [bookingPrice, setBookingPrice] = useState<string>("");
   const [paymentType, setPaymentType] = useState<"CASH" | "ONLINE">("CASH");
+  const [showRefreshModal, setShowRefreshModal] = useState(false);
 
   const supabase = createClientComponentClient();
   const { toast } = useToast();
@@ -134,25 +135,28 @@ export default function AdminPage() {
     return hour >= 6 || hour < 3;
   });
 
-  const fetchBookings = async (date: Date) => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("court_bookings")
-        .select("*, clients(name)")
-        .eq("booking_date", format(date, "yyyy-MM-dd"))
-        .order("start_time");
+  const fetchBookings = useCallback(
+    async (date: Date) => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("court_bookings")
+          .select("*, clients(name)")
+          .eq("booking_date", format(date, "yyyy-MM-dd"))
+          .order("start_time");
 
-      if (error) throw error;
-      setBookings(data || []);
-    } catch (error) {
-      console.error("Error fetching bookings:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (error) throw error;
+        setBookings(data || []);
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [supabase]
+  );
 
-  const fetchAllBookings = async () => {
+  const fetchAllBookings = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -167,9 +171,9 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
 
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     try {
       console.log("Fetching clients");
       const { data, error } = await supabase.from("clients").select("*");
@@ -188,10 +192,13 @@ export default function AdminPage() {
         description: "Failed to fetch clients. Please try again.",
       });
     }
-  };
+  }, [supabase, toast]);
 
   const createClient = async () => {
     try {
+      // First close the dialog to prevent UI freezing
+      setShowClientDialog(false);
+
       const { data, error } = await supabase
         .from("clients")
         .insert({ name: newClientName })
@@ -200,9 +207,12 @@ export default function AdminPage() {
 
       if (error) throw error;
 
-      setSelectedClient(data);
-      setShowClientDialog(false);
+      // Reset the new client name input
       setNewClientName("");
+
+      // Show the refresh modal instead of updating the UI directly
+      // This prevents the UI from freezing when a new client is added
+      setShowRefreshModal(true);
       toast({
         className: "bg-[#88aaee] border-2 border-black text-black",
         title: "Success!",
@@ -360,12 +370,13 @@ export default function AdminPage() {
   // Initial fetch
   useEffect(() => {
     fetchBookings(todayDate);
-  }, []);
+    fetchAllBookings();
+  }, [fetchBookings, fetchAllBookings, todayDate]);
 
   // Update the effect to fetch clients on component mount only
   useEffect(() => {
     fetchClients();
-  }, []);
+  }, [fetchClients]);
 
   const renderBookingsList = (
     bookingsList: Booking[],
@@ -869,6 +880,28 @@ export default function AdminPage() {
         </Dialog>
 
         <Toaster />
+
+        {/* Refresh Modal */}
+        <Dialog open={showRefreshModal} onOpenChange={setShowRefreshModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Refresh Required</DialogTitle>
+              <DialogDescription>
+                A new client has been added successfully. Refresh the page to
+                see the updated list.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="sm:justify-center">
+              <Button
+                type="button"
+                variant="default"
+                onClick={() => window.location.reload()}
+              >
+                Refresh Now
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </ThemeProvider>
   );
