@@ -39,7 +39,9 @@ export default function Hero() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="text-4xl text-gray-400 mb-8 max-w-2xl mx-auto"
               >
-                <Cover className="font-bold">READY, SET, SMASH!</Cover>
+                <Cover className="font-bold text-[#40b7ff]">
+                  READY, SET, SMASH!
+                </Cover>
               </motion.p>
 
               <motion.div
