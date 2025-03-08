@@ -59,6 +59,7 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command";
+import Analysis from "@/components/admin/Analysis";
 
 type Client = {
   id: string;
@@ -98,14 +99,12 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [clients, setClients] = useState<Client[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
   const [showClientDialog, setShowClientDialog] = useState(false);
   const [newClientName, setNewClientName] = useState("");
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [bookingPrice, setBookingPrice] = useState<string>("");
   const [paymentType, setPaymentType] = useState<"CASH" | "ONLINE">("CASH");
-  const [isClientPopoverOpen, setIsClientPopoverOpen] = useState(false);
 
   const supabase = createClientComponentClient();
   const { toast } = useToast();
@@ -170,9 +169,9 @@ export default function AdminPage() {
     }
   };
 
-  const fetchClients = async (search: string = "") => {
+  const fetchClients = async () => {
     try {
-      console.log("Fetching clients with search:", search);
+      console.log("Fetching clients");
       const { data, error } = await supabase.from("clients").select("*");
 
       if (error) {
@@ -182,7 +181,7 @@ export default function AdminPage() {
       console.log("Fetched clients:", data);
       setClients(data || []);
     } catch (error) {
-      console.error("Error searching clients:", error);
+      console.error("Error fetching clients:", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -363,17 +362,8 @@ export default function AdminPage() {
     fetchBookings(todayDate);
   }, []);
 
-  // Update the effect to fetch clients on popover open
+  // Update the effect to fetch clients on component mount only
   useEffect(() => {
-    if (isClientPopoverOpen) {
-      console.log("Popover opened, fetching initial clients");
-      fetchClients();
-    }
-  }, [isClientPopoverOpen]);
-
-  // Add a new effect to fetch clients on component mount
-  useEffect(() => {
-    console.log("Component mounted, fetching initial clients");
     fetchClients();
   }, []);
 
@@ -582,10 +572,12 @@ export default function AdminPage() {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
-      <div className="min-h-screen bg-[#dfe5f2] p-8">
+      <div className="min-h-screen bg-[#dfe5f2] p-4 md:p-8">
         {/* Header with Logout */}
         <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-black">Smash Pro Dashboard</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-black">
+            Smash Pro Dashboard
+          </h1>
           <Button
             onClick={handleLogout}
             className="flex items-center gap-2 bg-[#4d80e6] text-white font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
@@ -594,283 +586,190 @@ export default function AdminPage() {
           </Button>
         </div>
 
-        {/* Booking Form */}
-        <Card className="mb-8 border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-black">
-              New Booking
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form className="grid gap-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-black font-bold">Client Name</Label>
-                  <Popover
-                    open={isClientPopoverOpen}
-                    onOpenChange={setIsClientPopoverOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-between bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+        {/* Main Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mb-8">
+          {/* New Booking Form */}
+          <div className="lg:col-span-1">
+            <Card className="h-full border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <CardHeader>
+                <CardTitle className="text-xl md:text-2xl font-bold text-black">
+                  New Booking
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form className="grid gap-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-black font-bold">
+                        Client Name
+                      </Label>
+                      <Select
+                        value={selectedClient?.id || undefined}
+                        onValueChange={(value) => {
+                          const client = clients.find((c) => c.id === value);
+                          if (client) {
+                            setSelectedClient(client);
+                          }
+                        }}
                       >
-                        {selectedClient?.name || "Select client"}
-                        <Search className="h-4 w-4 opacity-50 text-black" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="p-0 border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                      align="start"
-                      sideOffset={4}
-                      style={{ width: "var(--radix-popover-trigger-width)" }}
-                    >
-                      <Command className="border-none bg-transparent">
-                        <CommandInput
-                          placeholder="Search clients..."
-                          value={searchTerm}
-                          onValueChange={(search) => {
-                            setSearchTerm(search);
-                            fetchClients(search);
-                          }}
-                          className="border-none focus:ring-0 text-black"
-                          autoFocus
-                        />
-                        <CommandEmpty>
-                          <div className="p-4 text-center">
-                            <p className="text-sm text-gray-600">
-                              No clients found
-                            </p>
+                        <SelectTrigger className="bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                          <SelectValue placeholder="Select client" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {clients.map((client) => (
+                            <SelectItem key={client.id} value={client.id}>
+                              {client.name}
+                            </SelectItem>
+                          ))}
+                          <div className="p-2 border-t border-gray-200">
                             <Button
-                              className="mt-2 bg-[#88aaee] text-black font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
-                              onClick={() => {
-                                setNewClientName(searchTerm);
+                              onClick={(e) => {
+                                e.preventDefault();
                                 setShowClientDialog(true);
                               }}
+                              className="w-full bg-[#88aaee] text-black font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
                             >
                               Create New Client
                             </Button>
                           </div>
-                        </CommandEmpty>
-                        <CommandGroup className="max-h-[200px] overflow-auto">
-                          {clients.map((client) => (
-                            <CommandItem
-                              key={client.id}
-                              value={client.name}
-                              onSelect={() => {
-                                setSelectedClient(client);
-                                setSearchTerm("");
-                                setIsClientPopoverOpen(false);
-                              }}
-                              className="flex items-center px-4 py-3 m-1 cursor-pointer text-black hover:bg-[#88aaee] hover:text-white rounded transition-all"
-                            >
-                              {client.name}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-black font-bold">Court</Label>
-                  <Select
-                    value={selectedCourt}
-                    onValueChange={(value: "COURT_ONE" | "COURT_TWO") =>
-                      setSelectedCourt(value)
-                    }
-                  >
-                    <SelectTrigger className="bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
-                      <SelectValue placeholder="Select court" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="COURT_ONE">Court One</SelectItem>
-                      <SelectItem value="COURT_TWO">Court Two</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-black font-bold">Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-black font-bold">Court</Label>
+                      <Select
+                        value={selectedCourt}
+                        onValueChange={(value: "COURT_ONE" | "COURT_TWO") =>
+                          setSelectedCourt(value)
+                        }
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {format(newBookingDate, "PPP")}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={newBookingDate}
-                        onSelect={(date) => date && setNewBookingDate(date)}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-black font-bold">Start Time</Label>
-                  <Select value={startTime} onValueChange={setStartTime}>
-                    <SelectTrigger className="bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
-                      <SelectValue placeholder="Select start time" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[200px]">
-                      {timeSlots.map((time) => (
-                        <SelectItem key={time} value={time}>
-                          {formatTimeToAMPM(time)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-black font-bold">End Time</Label>
-                  <Select value={endTime} onValueChange={setEndTime}>
-                    <SelectTrigger className="bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
-                      <SelectValue placeholder="Select end time" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[200px]">
-                      {timeSlots.map((time) => (
-                        <SelectItem key={time} value={time}>
-                          {formatTimeToAMPM(time)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <Button
-                onClick={handleBooking}
-                disabled={submitting}
-                className="w-full bg-[#88aaee] text-black font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
-              >
-                {submitting ? "Creating booking..." : "Create Booking"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                        <SelectTrigger className="bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                          <SelectValue placeholder="Select court" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="COURT_ONE">Court One</SelectItem>
+                          <SelectItem value="COURT_TWO">Court Two</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-black font-bold">Date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start text-left font-normal bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {format(newBookingDate, "PPP")}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={newBookingDate}
+                            onSelect={(date) => date && setNewBookingDate(date)}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-black font-bold">Start Time</Label>
+                      <Select value={startTime} onValueChange={setStartTime}>
+                        <SelectTrigger className="bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                          <SelectValue placeholder="Start" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[200px]">
+                          {timeSlots.map((time) => (
+                            <SelectItem key={time} value={time}>
+                              {formatTimeToAMPM(time)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-black font-bold">End Time</Label>
+                      <Select value={endTime} onValueChange={setEndTime}>
+                        <SelectTrigger className="bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                          <SelectValue placeholder="End" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[200px]">
+                          {timeSlots.map((time) => (
+                            <SelectItem key={time} value={time}>
+                              {formatTimeToAMPM(time)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleBooking}
+                    disabled={submitting}
+                    className="w-full bg-[#88aaee] text-black font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                  >
+                    {submitting ? "Creating booking..." : "Create Booking"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Bookings Tabs */}
-        <Tabs
-          defaultValue="today"
-          className="space-y-4"
-          onValueChange={handleTabChange}
-        >
-          <TabsList className="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-            <TabsTrigger
-              value="today"
-              className="data-[state=active]:bg-[#88aaee] data-[state=active]:text-black"
-            >
-              Today&apos;s Bookings
-            </TabsTrigger>
-            <TabsTrigger
-              value="all"
-              className="data-[state=active]:bg-[#88aaee] data-[state=active]:text-black"
-            >
-              All Bookings
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="today">
-            <Card className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <CardHeader className="pb-0">
-                <CardDescription className="text-black font-bold">
-                  {format(todayDate, "MMMM d, yyyy")}
-                </CardDescription>
+          {/* Bookings Display Section */}
+          <div className="lg:col-span-2">
+            <Card className="h-full border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <CardHeader>
+                <CardTitle className="text-xl md:text-2xl font-bold text-black">
+                  Bookings
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                {renderBookingsList(bookings, loading, true)}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="all">
-            <Card className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-4">
-                  <Input
-                    placeholder="Search bookings..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
-                  />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {filteredAllBookings.map((booking) => (
-                    <Card
-                      key={booking.id}
-                      className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                <Tabs
+                  defaultValue="today"
+                  className="space-y-4"
+                  onValueChange={handleTabChange}
+                >
+                  <TabsList className="w-full bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <TabsTrigger
+                      value="today"
+                      className="flex-1 data-[state=active]:bg-[#88aaee] data-[state=active]:text-black"
                     >
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="text-black font-bold">
-                              {booking.court === "COURT_ONE"
-                                ? "Court One"
-                                : "Court Two"}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              {format(
-                                new Date(booking.booking_date),
-                                "MMM d, yyyy"
-                              )}{" "}
-                              • {formatTimeToAMPM(booking.start_time)} -{" "}
-                              {formatTimeToAMPM(booking.end_time)}
-                            </p>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {booking.clients.name}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              {booking.price
-                                ? `₹${booking.price}`
-                                : "Payment pending"}
-                            </p>
-                          </div>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 bg-red-100 text-red-600 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:bg-red-200 transition-all"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="text-black">
-                                  Delete Booking
-                                </AlertDialogTitle>
-                                <AlertDialogDescription className="text-gray-600">
-                                  Are you sure you want to delete this booking?
-                                  This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="border-2 border-black bg-white text-black hover:bg-gray-100">
-                                  Cancel
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDelete(booking.id)}
-                                  className="bg-red-100 text-red-600 border-2 border-black hover:bg-red-200"
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                      Today&apos;s Bookings
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="all"
+                      className="flex-1 data-[state=active]:bg-[#88aaee] data-[state=active]:text-black"
+                    >
+                      All Bookings
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="today" className="mt-4">
+                    {renderBookingsList(bookings, loading, true)}
+                  </TabsContent>
+                  <TabsContent value="all" className="mt-4">
+                    <div className="space-y-4">
+                      <Input
+                        placeholder="Search bookings..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                      />
+                      {renderBookingsList(filteredAllBookings, loading)}
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
+
+        {/* Additional Components Grid */}
+        <div className="grid grid-cols-1 gap-4 md:gap-6 lg:gap-8">
+          {/* Analysis Component */}
+          <Analysis bookings={allBookings} todayBookings={bookings} />
+        </div>
 
         {/* New Client Dialog */}
         <Dialog open={showClientDialog} onOpenChange={setShowClientDialog}>
