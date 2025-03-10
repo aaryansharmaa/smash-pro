@@ -280,19 +280,11 @@ export default function AdminPage() {
       });
 
       if (error) {
-        if (error.code === "23514") {
-          toast({
-            variant: "destructive",
-            title: "Invalid Time Range",
-            description: "Please ensure the end time is after the start time.",
-          });
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to create booking. Please try again.",
-          });
-        }
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to create booking. Please try again.",
+        });
         throw error;
       }
 
