@@ -427,7 +427,9 @@ export default function AdminPage() {
         if (!booking) return null;
         return (
           <Card
-            className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer"
+            className={`border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer ${
+              booking.price ? "bg-green-50" : "bg-red-50"
+            }`}
             onClick={() => {
               setSelectedBooking(booking);
               setBookingPrice(booking.price?.toString() || "");
@@ -497,15 +499,26 @@ export default function AdminPage() {
     return (
       <div className="space-y-4">
         {bookingsList.map((booking) => (
-          <Card key={booking.id} className="border-gray-800 bg-gray-800">
-            <CardContent className="pt-6">
+          <Card
+            key={booking.id}
+            className={`border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer ${
+              booking.price ? "bg-green-50" : ""
+            }`}
+            onClick={() => {
+              setSelectedBooking(booking);
+              setBookingPrice(booking.price?.toString() || "");
+              setPaymentType(booking.payment_type || "CASH");
+              setShowPaymentDialog(true);
+            }}
+          >
+            <CardContent className="p-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-semibold">
-                    {booking.court === "COURT_ONE" ? "Court One" : "Court Two"}
-                  </h3>
-                  <p className="text-sm text-gray-400">
-                    {format(new Date(booking.booking_date), "MMM d, yyyy")} •{" "}
+                  <p className="text-black font-bold">
+                    {booking.court === "COURT_ONE" ? "Court One" : "Court Two"}{" "}
+                    • {format(new Date(booking.booking_date), "MMM d, yyyy")}
+                  </p>
+                  <p className="text-black font-bold">
                     {formatTimeToAMPM(booking.start_time)} -{" "}
                     {formatTimeToAMPM(booking.end_time)}
                   </p>
@@ -513,44 +526,22 @@ export default function AdminPage() {
                     {booking.clients.name}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {booking.price ? `₹${booking.price}` : "Payment pending"}
+                    {booking.price
+                      ? `₹${booking.price} • ${booking.payment_type}`
+                      : "Payment pending"}
                   </p>
                 </div>
-                <div className="flex items-start gap-4">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-400 hover:text-red-500 hover:bg-gray-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle className="text-black">
-                          Delete Booking
-                        </AlertDialogTitle>
-                        <AlertDialogDescription className="text-gray-600">
-                          Are you sure you want to delete this booking? This
-                          action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel className="border-2 border-black bg-white text-black hover:bg-gray-100">
-                          Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(booking.id)}
-                          className="bg-red-100 text-red-600 border-2 border-black hover:bg-red-200"
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(booking.id);
+                  }}
+                  className="h-8 w-8 bg-red-100 text-red-600 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:bg-red-200 transition-all"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </CardContent>
           </Card>
