@@ -176,7 +176,7 @@ export default function AdminPage() {
   const fetchClients = useCallback(async () => {
     try {
       console.log("Fetching clients");
-      const { data, error } = await supabase.from("clients").select("*");
+      const { data, error } = await supabase.from("clients").select("*").order('created_at', { ascending: false });
 
       if (error) {
         console.error("Error fetching clients:", error);
@@ -597,37 +597,46 @@ export default function AdminPage() {
                       <Label className="text-black font-bold">
                         Client Name
                       </Label>
-                      <Select
-                        value={selectedClient?.id || undefined}
-                        onValueChange={(value) => {
-                          const client = clients.find((c) => c.id === value);
-                          if (client) {
-                            setSelectedClient(client);
-                          }
-                        }}
-                      >
-                        <SelectTrigger className="bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
-                          <SelectValue placeholder="Select client" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {clients.map((client) => (
-                            <SelectItem key={client.id} value={client.id}>
-                              {client.name}
-                            </SelectItem>
-                          ))}
-                          <div className="p-2 border-t border-gray-200">
-                            <Button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setShowClientDialog(true);
-                              }}
-                              className="w-full bg-[#88aaee] text-black font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
-                            >
-                              Create New Client
-                            </Button>
-                          </div>
-                        </SelectContent>
-                      </Select>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="w-full justify-between bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                          >
+                            {selectedClient ? selectedClient.name : "Select client"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start">
+                          <Command className="w-full">
+                            <CommandInput placeholder="Search clients..." className="h-9" />
+                            <CommandEmpty>No client found.</CommandEmpty>
+                            <CommandGroup className="max-h-[200px] overflow-y-auto">
+                              {clients.map((client) => (
+                                <CommandItem
+                                  key={client.id}
+                                  onSelect={() => {
+                                    setSelectedClient(client);
+                                  }}
+                                >
+                                  {client.name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                            <div className="p-2 border-t border-gray-200">
+                              <Button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setShowClientDialog(true);
+                                }}
+                                className="w-full bg-[#88aaee] text-black font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                              >
+                                Create New Client
+                              </Button>
+                            </div>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-black font-bold">Court</Label>
