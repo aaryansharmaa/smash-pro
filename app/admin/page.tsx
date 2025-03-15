@@ -106,6 +106,8 @@ export default function AdminPage() {
   const [bookingPrice, setBookingPrice] = useState<string>("");
   const [paymentType, setPaymentType] = useState<"CASH" | "ONLINE">("CASH");
   const [showRefreshModal, setShowRefreshModal] = useState(false);
+  const [clientPopoverOpen, setClientPopoverOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const supabase = createClientComponentClient();
   const { toast } = useToast();
@@ -176,7 +178,10 @@ export default function AdminPage() {
   const fetchClients = useCallback(async () => {
     try {
       console.log("Fetching clients");
-      const { data, error } = await supabase.from("clients").select("*").order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from("clients")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Error fetching clients:", error);
@@ -597,46 +602,122 @@ export default function AdminPage() {
                       <Label className="text-black font-bold">
                         Client Name
                       </Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            className="w-full justify-between bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
-                          >
-                            {selectedClient ? selectedClient.name : "Select client"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start">
-                          <Command className="w-full">
-                            <CommandInput placeholder="Search clients..." className="h-9" />
-                            <CommandEmpty>No client found.</CommandEmpty>
-                            <CommandGroup className="max-h-[200px] overflow-y-auto">
-                              {clients.map((client) => (
-                                <CommandItem
-                                  key={client.id}
-                                  onSelect={() => {
-                                    setSelectedClient(client);
-                                  }}
-                                >
-                                  {client.name}
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
+                      <div className="space-y-2">
+                        <Select
+                          value={selectedClient?.id}
+                          onValueChange={(value) => {
+                            const selected = clients.find(
+                              (c) => c.id === value
+                            );
+                            setSelectedClient(selected || null);
+                          }}
+                        >
+                          <SelectTrigger className="w-full bg-white border-2 border-black text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                            <SelectValue defaultValue={selectedClient?.id}>
+                              {selectedClient?.name || "Select client"}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[400px]">
+                            <div className="p-2 border-b border-gray-200">
+                              <Input
+                                type="search"
+                                placeholder="Search clients..."
+                                className="border-2 border-black"
+                                value={searchQuery}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  setSearchQuery(e.target.value);
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                onKeyDown={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                            <div className="max-h-[300px] overflow-y-auto">
+                              {(() => {
+                                const filteredClients = clients.filter(
+                                  (client) =>
+                                    client.name
+                                      .toLowerCase()
+                                      .includes(searchQuery.toLowerCase())
+                                );
+
+                                return filteredClients.length > 0 ? (
+                                  filteredClients.map((client) => (
+                                    <SelectItem
+                                      key={client.id}
+                                      value={client.id}
+                                      className="cursor-pointer"
+                                    >
+                                      {client.name}
+                                    </SelectItem>
+                                  ))
+                                ) : (
+                                  <div className="p-2 text-center text-gray-500">
+                                    No clients found
+                                  </div>
+                                );
+                              })()}
+                            </div>
                             <div className="p-2 border-t border-gray-200">
                               <Button
-                                onClick={(e) => {
+                                onClick={async (e) => {
                                   e.preventDefault();
-                                  setShowClientDialog(true);
+                                  if (searchQuery.trim()) {
+                                    try {
+                                      const { data, error } = await supabase
+                                        .from("clients")
+                                        .insert({ name: searchQuery.trim() })
+                                        .select()
+                                        .single();
+
+                                      if (error) throw error;
+
+                                      // Create new client object
+                                      const newClient = {
+                                        id: data.id,
+                                        name: data.name,
+                                      };
+
+                                      // Update state
+                                      setClients((prevClients) => [
+                                        newClient,
+                                        ...prevClients,
+                                      ]);
+                                      setSelectedClient(newClient);
+                                      setSearchQuery("");
+
+                                      toast({
+                                        className:
+                                          "bg-[#88aaee] border-2 border-black text-black",
+                                        title: "Success!",
+                                        description:
+                                          "New client created and selected.",
+                                      });
+
+                                      // Force a re-render by toggling the Select
+                                      setIsOpen(false);
+                                    } catch (error) {
+                                      toast({
+                                        variant: "destructive",
+                                        title: "Error",
+                                        description:
+                                          "Failed to create client. Please try again.",
+                                      });
+                                    }
+                                  } else {
+                                    setShowClientDialog(true);
+                                  }
                                 }}
                                 className="w-full bg-[#88aaee] text-black font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
                               >
-                                Create New Client
+                                {searchQuery.trim()
+                                  ? `Create "${searchQuery.trim()}" as new client`
+                                  : "Create New Client"}
                               </Button>
                             </div>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-black font-bold">Court</Label>
