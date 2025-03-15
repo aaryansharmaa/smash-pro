@@ -21,7 +21,7 @@ export default function FranchisePage() {
             src="/f_3.jpg"
             alt="Smash Pro Pickleball Arena"
             fill
-            className="object-cover brightness-75"
+            className="object-cover brightness-75 mt-14 "
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-r mix-blend-multiply z-10" />
