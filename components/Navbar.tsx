@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const isFranchisePage = pathname === "/franchise";
 
   return (
     <nav className="fixed w-full z-50 bg-black/80 backdrop-blur-sm border-b border-[#40b7ff]/20">
@@ -30,26 +33,50 @@ export default function Navbar() {
 
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              <Link
-                href="#location"
-                className="text-white hover:text-[#40b7ff]"
-              >
-                <Button
-                  variant="ghost"
-                  className="text-white hover:text-[#40b7ff]"
-                >
-                  Location
-                </Button>
-              </Link>
-              <Link href="#faq" className="text-white hover:text-[#40b7ff]">
-                <Button
-                  variant="ghost"
-                  className="text-white hover:text-[#40b7ff]"
-                >
-                  FAQ
-                </Button>
-              </Link>
-              <Link href="tel:+1234567890">
+              {isFranchisePage ? (
+                <Link href="/" className="text-white hover:text-[#40b7ff]">
+                  <Button
+                    variant="ghost"
+                    className="text-black bg-[#40b7ff] hover:text-[#40b7ff]"
+                  >
+                    Home
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="#location"
+                    className="text-white hover:text-[#40b7ff]"
+                  >
+                    <Button
+                      variant="ghost"
+                      className="text-white hover:text-[#40b7ff]"
+                    >
+                      Location
+                    </Button>
+                  </Link>
+                  <Link
+                    href="/franchise"
+                    className="text-white hover:text-[#40b7ff]"
+                  >
+                    <Button
+                      variant="ghost"
+                      className="text-white hover:text-[#40b7ff]"
+                    >
+                      Franchise
+                    </Button>
+                  </Link>
+                  <Link href="#faq" className="text-white hover:text-[#40b7ff]">
+                    <Button
+                      variant="ghost"
+                      className="text-white hover:text-[#40b7ff]"
+                    >
+                      FAQ
+                    </Button>
+                  </Link>
+                </>
+              )}
+              <Link href="tel:+917702090273">
                 <Button className="bg-[#40b7ff] text-black hover:bg-[#40b7ff]/80">
                   Call and Book
                 </Button>
@@ -72,33 +99,54 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-black">
-            <Link href="/" className="block w-full">
-              <Button
-                variant="ghost"
-                className="w-full text-white hover:text-[#40b7ff]"
-              >
-                Home
-              </Button>
-            </Link>
-            <Link href="#location" className="block w-full">
-              <Button
-                variant="ghost"
-                className="w-full text-white hover:text-[#40b7ff]"
-              >
-                Location
-              </Button>
-            </Link>
-            <Link href="#faq" className="block w-full">
-              <Button
-                variant="ghost"
-                className="w-full text-white hover:text-[#40b7ff]"
-              >
-                FAQ
-              </Button>
-            </Link>
+            {isFranchisePage ? (
+              <Link href="/" className="block w-full">
+                <Button
+                  variant="ghost"
+                  className="w-full text-white hover:text-[#40b7ff]"
+                >
+                  Home
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/" className="block w-full">
+                  <Button
+                    variant="ghost"
+                    className="w-full text-white hover:text-[#40b7ff]"
+                  >
+                    Home
+                  </Button>
+                </Link>
+                <Link href="#location" className="block w-full">
+                  <Button
+                    variant="ghost"
+                    className="w-full text-white hover:text-[#40b7ff]"
+                  >
+                    Location
+                  </Button>
+                </Link>
+                <Link href="/franchise" className="block w-full">
+                  <Button
+                    variant="ghost"
+                    className="w-full text-white hover:text-[#40b7ff]"
+                  >
+                    Franchise
+                  </Button>
+                </Link>
+                <Link href="#faq" className="block w-full">
+                  <Button
+                    variant="ghost"
+                    className="w-full text-white hover:text-[#40b7ff]"
+                  >
+                    FAQ
+                  </Button>
+                </Link>
+              </>
+            )}
             <Link href="tel:+917702090273" className="block w-full">
               <Button className="w-full bg-[#40b7ff] text-black hover:bg-[#40b7ff]/80">
-                Call and Book{" "}
+                Call and Book
               </Button>
             </Link>
           </div>
