@@ -164,7 +164,8 @@ export default function AdminPage() {
       const { data, error } = await supabase
         .from("court_bookings")
         .select("*, clients(name)")
-        .order("booking_date", { ascending: true });
+        .order("booking_date", { ascending: false })
+        .order("start_time", { ascending: false });
 
       if (error) throw error;
       setAllBookings(data || []);
@@ -352,16 +353,29 @@ export default function AdminPage() {
 
   // Filter bookings based on search query
   const filteredAllBookings = useMemo(() => {
-    return allBookings.filter((booking) => {
-      const searchString = searchQuery.toLowerCase();
-      return (
-        booking.court.toLowerCase().includes(searchString) ||
-        booking.booking_date.toLowerCase().includes(searchString) ||
-        booking.start_time.toLowerCase().includes(searchString) ||
-        booking.end_time.toLowerCase().includes(searchString) ||
-        (booking.price?.toString() || "").toLowerCase().includes(searchString)
-      );
-    });
+    return allBookings
+      .filter((booking) => {
+        const searchString = searchQuery.toLowerCase();
+        return (
+          booking.court.toLowerCase().includes(searchString) ||
+          booking.booking_date.toLowerCase().includes(searchString) ||
+          booking.start_time.toLowerCase().includes(searchString) ||
+          booking.end_time.toLowerCase().includes(searchString) ||
+          (booking.price?.toString() || "")
+            .toLowerCase()
+            .includes(searchString) ||
+          booking.clients.name.toLowerCase().includes(searchString)
+        );
+      })
+      .sort((a, b) => {
+        // Sort by date first
+        const dateComparison =
+          new Date(b.booking_date).getTime() -
+          new Date(a.booking_date).getTime();
+        if (dateComparison !== 0) return dateComparison;
+        // If same date, sort by start time
+        return b.start_time.localeCompare(a.start_time);
+      });
   }, [allBookings, searchQuery]);
 
   // Initial fetch

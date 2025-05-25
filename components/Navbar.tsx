@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  const isFranchisePage = pathname === "/franchise";
+  const isConsultancyPage = pathname === "/consultancy";
 
   return (
     <nav className="fixed w-full z-50 bg-black/80 backdrop-blur-sm border-b border-[#40b7ff]/20">
@@ -33,7 +33,7 @@ export default function Navbar() {
 
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              {isFranchisePage ? (
+              {isConsultancyPage ? (
                 <Link href="/" className="text-white hover:text-[#40b7ff]">
                   <Button
                     variant="ghost"
@@ -56,14 +56,14 @@ export default function Navbar() {
                     </Button>
                   </Link>
                   <Link
-                    href="/franchise"
+                    href="/consultancy"
                     className="text-white hover:text-[#40b7ff]"
                   >
                     <Button
                       variant="ghost"
                       className="text-white hover:text-[#40b7ff]"
                     >
-                      Franchise
+                      Consultancy
                     </Button>
                   </Link>
                   <Link href="#faq" className="text-white hover:text-[#40b7ff]">
@@ -99,7 +99,7 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-black">
-            {isFranchisePage ? (
+            {isConsultancyPage ? (
               <Link href="/" className="block w-full">
                 <Button
                   variant="ghost"
@@ -126,12 +126,12 @@ export default function Navbar() {
                     Location
                   </Button>
                 </Link>
-                <Link href="/franchise" className="block w-full">
+                <Link href="/consultancy" className="block w-full">
                   <Button
                     variant="ghost"
                     className="w-full text-white hover:text-[#40b7ff]"
                   >
-                    Franchise
+                    Consultancy
                   </Button>
                 </Link>
                 <Link href="#faq" className="block w-full">

@@ -45,12 +45,12 @@ export default function Navbar() {
                 FAQ
               </Button>
             </Link>
-            <Link href="/franchise">
+            <Link href="/consultancy">
               <Button
                 variant="ghost"
                 className="text-white hover:text-[#40b7ff]"
               >
-                Franchise
+                Consultancy
               </Button>
             </Link>
             <Link href="tel:+917702090273">
@@ -99,12 +99,12 @@ export default function Navbar() {
                 FAQ
               </Button>
             </Link>
-            <Link href="/franchise" className="block w-full">
+            <Link href="/consultancy" className="block w-full">
               <Button
                 variant="ghost"
                 className="w-full text-white hover:text-[#40b7ff]"
               >
-                Franchise
+                Consultancy
               </Button>
             </Link>
             <Link href="tel:+917702090273" className="block w-full">
