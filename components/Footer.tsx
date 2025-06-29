@@ -119,7 +119,7 @@ export default function Footer() {
             © {new Date().getFullYear()} Smash Pro Arena. All rights reserved.
             Crafted by{" "}
             <a
-              href="https://aaryansharma.info/ "
+              href="https://aaryansharma.xyz/ "
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#40b7ff] hover:text-[#40b7ff]/80 transition-colors duration-2001 font-medium animate-pulse"
